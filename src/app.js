@@ -10,9 +10,28 @@ import groqRoutes from "./routes/groqRoutes.js";
 dotenv.config();
 const app = express();
 
+const allowedOrigins = [
+  "https://rakanugrahadev.vercel.app",
+  "http://localhost:3000",
+];
+
 // Middleware
 app.use(express.json());
-app.use(cors({ credentials: true, origin: process.env.FRONTEND_URL }));
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, origin); // Izinkan request jika origin sesuai daftar
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: "GET,POST,PUT,DELETE",
+    allowedHeaders: "Content-Type,Authorization",
+  })
+);
+
 app.use(cookieParser());
 
 // Koneksi ke database
