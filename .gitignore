@@ -1,0 +1,33 @@
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+.env
+
+# Logs
+logs
+*.log
+logs/*
+
+# Database
+/data/
+mongodb/
+dump/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Editor Files
+.vscode/
+.idea/
+*.swp
+
+# Build files
+dist/
+build/
+
+# Docker
+.dockerignore
+docker-compose.override.yml
