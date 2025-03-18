@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const AI_URL = process.env.GROQ_API_URL;
+const API_KEY = process.env.GROQ_API_KEY;
 
 // Fungsi untuk mengambil data Raka Nugraha dari database
 const getProfileData = async () => {
@@ -13,66 +14,81 @@ const getProfileData = async () => {
 
   // Fungsi untuk mengubah format tanggal menjadi "Bulan Tahun"
   const formatDate = (dateString, showDay = false) => {
+    if (!dateString) return "Tidak diketahui";
     const date = new Date(dateString);
     const options = { year: "numeric", month: "long" };
     if (showDay) options.day = "numeric";
     return date.toLocaleDateString("id-ID", options);
   };
 
+  // Cek jika data kosong
+  const skills = profile.skills?.length
+    ? profile.skills.map((skill, index) => `${index + 1}. ${skill}`).join("\n")
+    : "Tidak ada data.";
+
+  const experience = profile.experience?.length
+    ? profile.experience
+        .map((exp, index) => {
+          const startFormatted = formatDate(exp.startDate, !exp.endDate);
+          const endFormatted = exp.endDate
+            ? formatDate(exp.endDate)
+            : "sekarang";
+          return `${index + 1}. **${exp.role}** di ${
+            exp.company
+          } (${startFormatted} - ${endFormatted})`;
+        })
+        .join("\n")
+    : "Tidak ada pengalaman kerja yang tersedia.";
+
+  const education = profile.education?.length
+    ? profile.education
+        .map((edu, index) => {
+          const startFormatted = formatDate(edu.startDate);
+          const endFormatted = edu.endDate
+            ? formatDate(edu.endDate)
+            : "sekarang";
+          return `${index + 1}. **${edu.degree}** di ${
+            edu.school
+          } (${startFormatted} - ${endFormatted})`;
+        })
+        .join("\n")
+    : "Tidak ada riwayat pendidikan yang tersedia.";
+
+  const projects = profile.projects?.length
+    ? profile.projects
+        .map(
+          (proj, index) =>
+            `${index + 1}. **${proj.title}**: ${
+              proj.description
+            } [Lihat di sini](${proj.link})`
+        )
+        .join("\n")
+    : "Tidak ada proyek yang tersedia.";
+
   return `
   **Nama**: ${profile.name}
   **Tentang**: ${profile.about}
 
   **Keahlian**:
-  ${profile.skills.map((skill) => `- ${skill}`).join("\n")}
+  ${skills}
 
   **Pengalaman Kerja**:
-  ${profile.experience
-    .map((exp) => {
-      const startFormatted = formatDate(exp.startDate, !exp.endDate);
-      const endFormatted =
-        exp.endDate && exp.endDate !== ""
-          ? formatDate(exp.endDate)
-          : "sekarang";
-      const startYear = new Date(exp.startDate).getFullYear();
-      const endYear =
-        exp.endDate && exp.endDate !== ""
-          ? new Date(exp.endDate).getFullYear()
-          : null;
-      const duration = endYear
-        ? `${endYear - startYear} tahun`
-        : `sejak ${startFormatted}`;
-
-      return exp.endDate && exp.endDate !== ""
-        ? `- **${exp.role}** di ${exp.company} (${duration})`
-        : `- **${exp.role}** di ${exp.company} (${startFormatted} - ${endFormatted})`;
-    })
-    .join("\n")}
+  ${experience}
 
   **Pendidikan**:
-  ${profile.education
-    .map((edu) => {
-      const startFormatted = formatDate(edu.startDate);
-      const endFormatted =
-        edu.endDate && edu.endDate !== ""
-          ? formatDate(edu.endDate)
-          : "sekarang";
-      return `- **${edu.degree}** di ${edu.school} (${startFormatted} - ${endFormatted})`;
-    })
-    .join("\n")}
+  ${education}
     
   **Proyek**:
-  ${profile.projects
-    .map(
-      (proj) =>
-        `- **${proj.title}**: ${proj.description} [Lihat di sini](${proj.link})`
-    )
-    .join("\n")}
+  ${projects}
   `;
 };
 
 // Fungsi untuk memproses pertanyaan ke AI
 export const chatWithAI = async (message) => {
+  if (!AI_URL || !API_KEY) {
+    return "Konfigurasi API tidak ditemukan. Harap periksa variabel lingkungan.";
+  }
+
   const profileData = await getProfileData();
 
   try {
@@ -94,13 +110,15 @@ export const chatWithAI = async (message) => {
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          Authorization: `Bearer ${API_KEY}`,
           "Content-Type": "application/json",
         },
       }
     );
 
-    let aiResponse = response.data.choices[0].message.content;
+    let aiResponse =
+      response.data.choices[0]?.message?.content ||
+      "AI tidak memberikan jawaban.";
 
     // Perbaikan format jawaban AI agar lebih alami
     aiResponse = aiResponse
@@ -115,7 +133,7 @@ export const chatWithAI = async (message) => {
 
     return aiResponse;
   } catch (error) {
-    console.error("AI Chat Error:", error);
-    return "Terjadi kesalahan saat memproses pertanyaan.";
+    console.error("AI Chat Error:", error?.response?.data || error.message);
+    return "Terjadi kesalahan saat memproses pertanyaan. Coba lagi nanti.";
   }
 };
