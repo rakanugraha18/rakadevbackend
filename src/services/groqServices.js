@@ -9,78 +9,114 @@ const API_KEY = process.env.GROQ_API_KEY;
 
 // Fungsi untuk mengambil data Raka Nugraha dari database
 const getProfileData = async () => {
-  const profile = await Profile.findOne();
-  if (!profile) return "Data tentang Raka Nugraha belum tersedia.";
+  try {
+    const profile = await Profile.findOne();
+    if (!profile) return "Data tentang Raka Nugraha belum tersedia.";
 
-  // Fungsi untuk mengubah format tanggal menjadi "Bulan Tahun"
-  const formatDate = (dateString, showDay = false) => {
-    if (!dateString) return "Tidak diketahui";
-    const date = new Date(dateString);
-    const options = { year: "numeric", month: "long" };
-    if (showDay) options.day = "numeric";
-    return date.toLocaleDateString("id-ID", options);
-  };
+    // Fungsi untuk mengubah format tanggal menjadi "Bulan Tahun"
+    const formatDate = (dateString, showDay = false) => {
+      if (!dateString) return "Tidak diketahui";
+      const date = new Date(dateString);
+      const options = { year: "numeric", month: "long" };
+      if (showDay) options.day = "numeric";
+      return date.toLocaleDateString("id-ID", options);
+    };
 
-  // Cek jika data kosong
-  const skills = profile.skills?.length
-    ? profile.skills.map((skill, index) => `${index + 1}. ${skill}`).join("\n")
-    : "Tidak ada data.";
+    // Format keahlian berdasarkan kategori
+    const formatSkills = (category) =>
+      profile.skills[category]?.length
+        ? profile.skills[category].map((skill) => `- ${skill}`).join("\n")
+        : "- Tidak ada data.";
 
-  const experience = profile.experience?.length
-    ? profile.experience
-        .map((exp, index) => {
-          const startFormatted = formatDate(exp.startDate, !exp.endDate);
-          const endFormatted = exp.endDate
-            ? formatDate(exp.endDate)
-            : "sekarang";
-          return `${index + 1}. **${exp.role}** di ${
-            exp.company
-          } (${startFormatted} - ${endFormatted})`;
-        })
-        .join("\n")
-    : "Tidak ada pengalaman kerja yang tersedia.";
+    const experience = profile.experience?.length
+      ? profile.experience
+          .map((exp, index) => {
+            const startFormatted = formatDate(exp.startDate, !exp.endDate);
+            const endFormatted = exp.endDate
+              ? formatDate(exp.endDate)
+              : "sekarang";
+            return `${index + 1}. **${exp.role}** di **${
+              exp.company
+            }** (${startFormatted} - ${endFormatted})`;
+          })
+          .join("\n")
+      : "Tidak ada pengalaman kerja yang tersedia.";
 
-  const education = profile.education?.length
-    ? profile.education
-        .map((edu, index) => {
-          const startFormatted = formatDate(edu.startDate);
-          const endFormatted = edu.endDate
-            ? formatDate(edu.endDate)
-            : "sekarang";
-          return `${index + 1}. **${edu.degree}** di ${
-            edu.school
-          } (${startFormatted} - ${endFormatted})`;
-        })
-        .join("\n")
-    : "Tidak ada riwayat pendidikan yang tersedia.";
+    const education = profile.education?.length
+      ? profile.education
+          .map((edu, index) => {
+            const startFormatted = formatDate(edu.startDate);
+            const endFormatted = edu.endDate
+              ? formatDate(edu.endDate)
+              : "sekarang";
+            return `${index + 1}. **${edu.degree}** di **${
+              edu.school
+            }** (${startFormatted} - ${endFormatted})`;
+          })
+          .join("\n")
+      : "Tidak ada riwayat pendidikan yang tersedia.";
 
-  const projects = profile.projects?.length
-    ? profile.projects
-        .map(
-          (proj, index) =>
-            `${index + 1}. **${proj.title}**: ${
-              proj.description
-            } [Lihat di sini](${proj.link})`
-        )
-        .join("\n")
-    : "Tidak ada proyek yang tersedia.";
+    const projects = profile.projects?.length
+      ? profile.projects
+          .map(
+            (proj, index) =>
+              `${index + 1}. **${proj.title}**: ${
+                proj.description
+              } [Lihat di sini](${proj.link})`
+          )
+          .join("\n")
+      : "Tidak ada proyek yang tersedia.";
 
-  return `
-  **Nama**: ${profile.name}
-  **Tentang**: ${profile.about}
+    const hobbies = profile.hobbies?.length
+      ? profile.hobbies.map((hobby) => `- ${hobby}`).join("\n")
+      : "- Tidak ada hobi yang tercatat.";
 
-  **Keahlian**:
-  ${skills}
+    const interests = profile.interests?.length
+      ? profile.interests.map((interest) => `- ${interest}`).join("\n")
+      : "- Tidak ada minat yang tercatat.";
 
-  **Pengalaman Kerja**:
-  ${experience}
+    return `
+**Nama**: ${profile.name}
+**Tentang**: ${profile.about}
 
-  **Pendidikan**:
-  ${education}
-    
-  **Proyek**:
-  ${projects}
-  `;
+**Keahlian**:
+- **UI/UX**:
+${formatSkills("UIUX")}
+
+- **Frontend**:
+${formatSkills("frontend")}
+
+- **Backend**:
+${formatSkills("backend")}
+
+- **DevOps**:
+${formatSkills("devops")}
+
+- **Version Control**:
+${formatSkills("versionControl")}
+
+- **Artificial Intelligence**:
+${formatSkills("AI")}
+
+**Pengalaman Kerja**:
+${experience}
+
+**Pendidikan**:
+${education}
+
+**Proyek**:
+${projects}
+
+**Hobi**:
+${hobbies}
+
+**Minat**:
+${interests}
+    `;
+  } catch (error) {
+    console.error("Error mengambil data profil:", error);
+    return "Terjadi kesalahan dalam mengambil data profil.";
+  }
 };
 
 // Fungsi untuk memproses pertanyaan ke AI
