@@ -6,6 +6,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import groqRoutes from "./routes/groqRoutes.js";
+import emailRoutes from "./routes/emailRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -41,5 +42,6 @@ connectDB();
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/groq", groqRoutes);
+app.use("/api/email", emailRoutes);
 
 export default app;
