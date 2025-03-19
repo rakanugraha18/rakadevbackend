@@ -145,7 +145,6 @@ const chatWithAI = async (message) => {
             - Semua daftar harus menggunakan angka (1, 2, 3...) atau tanda "-".
             - Pastikan setiap entri dalam daftar diberi pemisah baris yang jelas.
             - Format daftar harus menggunakan markdown agar bisa ditampilkan dengan benar.
-            - Untuk Durasi, buat seperti ini Durasi: Juli 2011 - Juni 2014 jadi di satukan dalam satu baris dan tidak terpisah dengan bullet point.
             `,
           },
           { role: "system", content: profileData },
