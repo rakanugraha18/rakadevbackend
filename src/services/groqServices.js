@@ -120,7 +120,8 @@ ${interests}
 };
 
 // Fungsi untuk memproses pertanyaan ke AI
-export const chatWithAI = async (message) => {
+export // Fungsi untuk memproses pertanyaan ke AI
+const chatWithAI = async (message) => {
   if (!AI_URL || !API_KEY) {
     return "Konfigurasi API tidak ditemukan. Harap periksa variabel lingkungan.";
   }
@@ -137,7 +138,15 @@ export const chatWithAI = async (message) => {
             role: "system",
             content: `Saat ini sudah tahun 2025. Semua informasi harus sesuai dengan tahun 2025. 
             Anda adalah AI asisten yang hanya memberikan informasi tentang Raka Nugraha. 
-            Jika pertanyaan tidak berkaitan dengan Raka Nugraha, tolak dengan sopan.`,
+            Jika pertanyaan tidak berkaitan dengan Raka Nugraha, tolak dengan sopan.
+
+            **FORMAT RESPON HARUS KONSISTEN**:
+            - Semua daftar harus menggunakan angka (1, 2, 3...) atau tanda "-".
+            - Jangan gunakan angka 1 di semua daftar, harus urut.
+            - Pastikan setiap entri dalam daftar diberi pemisah baris yang jelas.
+            - Format daftar harus menggunakan markdown agar bisa ditampilkan dengan benar.
+            - Untuk StartDate dan EndDate, gunakan format "Bulan Tahun" dan dibuat dalam satu baris jadi misal Oktober 2014 - Juni 2016.
+            `,
           },
           { role: "system", content: profileData },
           { role: "user", content: message },
