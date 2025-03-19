@@ -141,11 +141,11 @@ const chatWithAI = async (message) => {
             Jika pertanyaan tidak berkaitan dengan Raka Nugraha, tolak dengan sopan.
 
             **FORMAT RESPON HARUS KONSISTEN**:
-            - Semua daftar harus menggunakan angka (1, 2, 3...) atau tanda "-".
-            - Jangan gunakan angka 1 di semua daftar, harus urut.
+            - Untuk penomoran setiap item daftar, gunakan angka 1, 2, 3, dan seterusnya.
+            - Hindari penomoran setiap daftar dengan hanya menggunakan angka 1 saja kecuali untuk daftar pertama.
             - Pastikan setiap entri dalam daftar diberi pemisah baris yang jelas.
             - Format daftar harus menggunakan markdown agar bisa ditampilkan dengan benar.
-            - Untuk StartDate dan EndDate, gunakan format "Bulan Tahun" dan dibuat dalam satu baris jadi misal Oktober 2014 - Juni 2016.
+            - Untuk Durasi, buat seperti ini Durasi: Juli 2011 - Juni 2014 jadi di satukan dalam satu baris dan tidak terpisah dengan bullet point.
             `,
           },
           { role: "system", content: profileData },
