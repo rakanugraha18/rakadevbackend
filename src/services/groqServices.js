@@ -7,25 +7,25 @@ dotenv.config();
 const AI_URL = process.env.GROQ_API_URL;
 const API_KEY = process.env.GROQ_API_KEY;
 
-// Fungsi untuk mengambil data Raka Nugraha dari database
+// Function to retrieve Raka Nugraha's profile data from the database
 const getProfileData = async () => {
   try {
     const profile = await Profile.findOne();
-    if (!profile) return "Data tentang Raka Nugraha belum tersedia.";
+    if (!profile) return "Raka Nugraha's profile data is not available.";
 
     return formatMarkdownData(profile);
   } catch (error) {
-    console.error("Error mengambil data profil:", error);
-    return "Terjadi kesalahan dalam mengambil data profil.";
+    console.error("Error retrieving profile data:", error);
+    return "An error occurred while fetching profile data.";
   }
 };
 
 function formatMarkdownData(data) {
   let markdown = `# ${data.name}\n\n`;
-  markdown += `## Tentang Saya\n${data.about}\n\n`;
+  markdown += `## About Me\n${data.about}\n\n`;
 
   // **SKILLS**
-  markdown += `## Keahlian:\n`;
+  markdown += `## Skills:\n`;
   data.skills.forEach((category, index) => {
     markdown += `${index + 1}. **${category.category}**:\n`;
     category.skills.forEach((skill) => {
@@ -34,60 +34,60 @@ function formatMarkdownData(data) {
   });
 
   // **EXPERIENCE**
-  markdown += `\n## Pengalaman Kerja:\n`;
+  markdown += `\n## Work Experience:\n`;
   data.experience.forEach((exp, index) => {
-    markdown += `${index + 1}. **${exp.role}** di *${exp.company}*\n`;
-    markdown += `   - Durasi: ${
+    markdown += `${index + 1}. **${exp.role}** at *${exp.company}*\n`;
+    markdown += `   - Duration: ${
       exp.duration.startDate.toISOString().split("T")[0]
     } - ${
       exp.duration.endDate
         ? exp.duration.endDate.toISOString().split("T")[0]
-        : "Sekarang"
+        : "Present"
     }\n`;
   });
 
   // **EDUCATION**
-  markdown += `\n## Pendidikan:\n`;
+  markdown += `\n## Education:\n`;
   data.education.forEach((edu, index) => {
-    markdown += `${index + 1}. **${edu.degree}** di *${edu.school}*\n`;
-    markdown += `   - Durasi: ${
+    markdown += `${index + 1}. **${edu.degree}** at *${edu.school}*\n`;
+    markdown += `   - Duration: ${
       edu.duration.startDate.toISOString().split("T")[0]
     } - ${edu.duration.endDate.toISOString().split("T")[0]}\n`;
   });
 
   // **COURSES & CERTIFICATIONS**
-  markdown += `\n## Pelatihan & Sertifikasi:\n`;
+  markdown += `\n## Training & Certifications:\n`;
   data.coursesTrainingCertifications.forEach((course, index) => {
-    markdown += `${index + 1}. **${course.title}** di *${
+    markdown += `${index + 1}. **${course.title}** at *${
       course.institution
     }*\n`;
-    markdown += `   - Durasi: ${
+    markdown += `   - Duration: ${
       course.duration.startDate.toISOString().split("T")[0]
     } - ${course.duration.endDate.toISOString().split("T")[0]}\n`;
   });
 
   // **PROJECTS**
-  markdown += `\n## Proyek:\n`;
+  markdown += `\n## Projects:\n`;
   data.projects.forEach((project, index) => {
     markdown += `${index + 1}. **${project.title}**\n`;
     markdown += `   - ${project.description}\n`;
-    markdown += `   - [Lihat proyek](${project.link})\n`;
+    markdown += `   - [View Project](${project.link})\n`;
   });
 
   // **HOBBIES**
-  markdown += `\n## Hobi:\n`;
+  markdown += `\n## Hobbies:\n`;
   data.hobbies.forEach((hobby, index) => {
     markdown += `${index + 1}. ${hobby}\n`;
   });
 
   // **INTERESTS**
-  markdown += `\n## Minat:\n`;
+  markdown += `\n## Interests:\n`;
   data.interests.forEach((interest, index) => {
     markdown += `${index + 1}. ${interest}\n`;
   });
 
   // **LANGUAGES**
-  markdown += `\n## Bahasa:\n`;
+  markdown += `\n## Languages:\n`;
   data.languages.forEach((language, index) => {
     if (typeof language.level === "string") {
       markdown += `${index + 1}. **${language.language}** - ${
@@ -104,10 +104,10 @@ function formatMarkdownData(data) {
   return markdown;
 }
 
-// Fungsi untuk memproses pertanyaan ke AI
+// Function to process user questions with AI
 export const chatWithAI = async (message) => {
   if (!AI_URL || !API_KEY) {
-    return "Konfigurasi API tidak ditemukan. Harap periksa variabel lingkungan.";
+    return "API configuration is missing. Please check your environment variables.";
   }
 
   const profileData = await getProfileData();
@@ -120,15 +120,15 @@ export const chatWithAI = async (message) => {
         messages: [
           {
             role: "system",
-            content: `Saat ini sudah tahun 2025. Semua informasi harus sesuai dengan tahun 2025. 
-            Anda adalah AI asisten yang hanya memberikan informasi tentang Raka Nugraha. 
-            Jika pertanyaan tidak berkaitan dengan Raka Nugraha, tolak dengan sopan.
+            content: `The current year is 2025. All information must be relevant to 2025. 
+            You are an AI assistant that provides information exclusively about Raka Nugraha. 
+            If a question is unrelated to Raka Nugraha, politely decline to answer.
 
-            **FORMAT RESPON HARUS KONSISTEN**:
-            - Untuk penomoran setiap item daftar, gunakan angka 1, 2, 3, dan seterusnya.
-            - Semua daftar harus menggunakan angka (1, 2, 3...) atau tanda "-".
-            - Pastikan setiap entri dalam daftar diberi pemisah baris yang jelas.
-            - Format daftar harus menggunakan markdown agar bisa ditampilkan dengan benar.
+            **RESPONSE FORMAT MUST BE CONSISTENT**:
+            - Use numbering for lists (1, 2, 3, etc.).
+            - All lists must use numbers (1, 2, 3...) or bullet points ("-").
+            - Ensure each list item is clearly separated.
+            - The list format must follow markdown for proper display.
             `,
           },
           { role: "system", content: profileData },
@@ -146,22 +146,22 @@ export const chatWithAI = async (message) => {
 
     let aiResponse =
       response.data.choices[0]?.message?.content ||
-      "AI tidak memberikan jawaban.";
+      "AI did not provide a response.";
 
-    // Perbaikan format jawaban AI agar lebih alami
+    // Improve AI response formatting for clarity
     aiResponse = aiResponse
-      .replace(/<think>.*?<\/think>/gis, "") // Hapus "<think>...</think>"
-      .replace(/\*\*(.*?)\*\*/g, "**$1**") // Pastikan bold tetap bold
-      .replace(/- /g, "\n- ") // Format bullet point lebih rapi
+      .replace(/<think>.*?<\/think>/gis, "") // Remove "<think>...</think>"
+      .replace(/\*\*(.*?)\*\*/g, "**$1**") // Ensure bold text remains bold
+      .replace(/- /g, "\n- ") // Format bullet points more neatly
       .replace(
-        /Saya mengetahui informasi tentang Raka Nugraha dari data yang Anda berikan\..*/gi,
-        "Saya memiliki informasi lengkap tentang Raka Nugraha berdasarkan data yang telah disediakan. Jika ingin mengetahui lebih lanjut, silakan tanyakan."
+        /I know about Raka Nugraha based on the data you provided\..*/gi,
+        "I have complete information about Raka Nugraha based on the provided data. If you would like to know more, please ask."
       )
       .trim();
 
     return aiResponse;
   } catch (error) {
     console.error("AI Chat Error:", error?.response?.data || error.message);
-    return "Terjadi kesalahan saat memproses pertanyaan. Coba lagi nanti.";
+    return "An error occurred while processing the request. Please try again later.";
   }
 };
