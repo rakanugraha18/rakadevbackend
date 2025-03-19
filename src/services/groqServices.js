@@ -13,115 +13,72 @@ const getProfileData = async () => {
     const profile = await Profile.findOne();
     if (!profile) return "Data tentang Raka Nugraha belum tersedia.";
 
-    // Fungsi untuk mengubah format tanggal menjadi "Bulan Tahun"
-    const formatDate = (dateString, showDay = false) => {
-      if (!dateString) return "Tidak diketahui";
-      const date = new Date(dateString);
-      const options = { year: "numeric", month: "long" };
-      if (showDay) options.day = "numeric";
-      return date.toLocaleDateString("id-ID", options);
-    };
-
-    // Format keahlian berdasarkan kategori
-    const formatSkills = (category) =>
-      profile.skills[category]?.length
-        ? profile.skills[category].map((skill) => `- ${skill}`).join("\n")
-        : "- Tidak ada data.";
-
-    const experience = profile.experience?.length
-      ? profile.experience
-          .map((exp, index) => {
-            const startFormatted = formatDate(exp.startDate, !exp.endDate);
-            const endFormatted = exp.endDate
-              ? formatDate(exp.endDate)
-              : "sekarang";
-            return `${index + 1}. **${exp.role}** di **${
-              exp.company
-            }** (${startFormatted} - ${endFormatted})`;
-          })
-          .join("\n")
-      : "Tidak ada pengalaman kerja yang tersedia.";
-
-    const education = profile.education?.length
-      ? profile.education
-          .map((edu, index) => {
-            const startFormatted = formatDate(edu.startDate);
-            const endFormatted = edu.endDate
-              ? formatDate(edu.endDate)
-              : "sekarang";
-            return `${index + 1}. **${edu.degree}** di **${
-              edu.school
-            }** (${startFormatted} - ${endFormatted})`;
-          })
-          .join("\n")
-      : "Tidak ada riwayat pendidikan yang tersedia.";
-
-    const projects = profile.projects?.length
-      ? profile.projects
-          .map(
-            (proj, index) =>
-              `${index + 1}. **${proj.title}**: ${
-                proj.description
-              } [Lihat di sini](${proj.link})`
-          )
-          .join("\n")
-      : "Tidak ada proyek yang tersedia.";
-
-    const hobbies = profile.hobbies?.length
-      ? profile.hobbies.map((hobby) => `- ${hobby}`).join("\n")
-      : "- Tidak ada hobi yang tercatat.";
-
-    const interests = profile.interests?.length
-      ? profile.interests.map((interest) => `- ${interest}`).join("\n")
-      : "- Tidak ada minat yang tercatat.";
-
-    return `
-**Nama**: ${profile.name}
-**Tentang**: ${profile.about}
-
-**Keahlian**:
-- **UI/UX**:
-${formatSkills("UIUX")}
-
-- **Frontend**:
-${formatSkills("frontend")}
-
-- **Backend**:
-${formatSkills("backend")}
-
-- **DevOps**:
-${formatSkills("devops")}
-
-- **Version Control**:
-${formatSkills("versionControl")}
-
-- **Artificial Intelligence**:
-${formatSkills("AI")}
-
-**Pengalaman Kerja**:
-${experience}
-
-**Pendidikan**:
-${education}
-
-**Proyek**:
-${projects}
-
-**Hobi**:
-${hobbies}
-
-**Minat**:
-${interests}
-    `;
+    return formatMarkdownData(profile);
   } catch (error) {
     console.error("Error mengambil data profil:", error);
     return "Terjadi kesalahan dalam mengambil data profil.";
   }
 };
 
+function formatMarkdownData(data) {
+  let markdown = `# ${data.name}\n\n`;
+  markdown += `## Tentang Saya\n${data.about}\n\n`;
+
+  // **SKILLS**
+  markdown += `## Keahlian:\n`;
+  data.skills.forEach((category, index) => {
+    markdown += `${index + 1}. **${category.category}**:\n`;
+    category.skills.forEach((skill) => {
+      markdown += `   - ${skill}\n`;
+    });
+  });
+
+  // **EXPERIENCE**
+  markdown += `\n## Pengalaman Kerja:\n`;
+  data.experience.forEach((exp, index) => {
+    markdown += `${index + 1}. **${exp.role}** di *${exp.company}*\n`;
+    markdown += `   - Durasi: ${
+      exp.duration.startDate.toISOString().split("T")[0]
+    } - ${
+      exp.duration.endDate
+        ? exp.duration.endDate.toISOString().split("T")[0]
+        : "Sekarang"
+    }\n`;
+  });
+
+  // **EDUCATION**
+  markdown += `\n## Pendidikan:\n`;
+  data.education.forEach((edu, index) => {
+    markdown += `${index + 1}. **${edu.degree}** di *${edu.school}*\n`;
+    markdown += `   - Durasi: ${
+      edu.duration.startDate.toISOString().split("T")[0]
+    } - ${edu.duration.endDate.toISOString().split("T")[0]}\n`;
+  });
+
+  // **COURSES & CERTIFICATIONS**
+  markdown += `\n## Pelatihan & Sertifikasi:\n`;
+  data.coursesTrainingCertifications.forEach((course, index) => {
+    markdown += `${index + 1}. **${course.title}** di *${
+      course.institution
+    }*\n`;
+    markdown += `   - Durasi: ${
+      course.duration.startDate.toISOString().split("T")[0]
+    } - ${course.duration.endDate.toISOString().split("T")[0]}\n`;
+  });
+
+  // **PROJECTS**
+  markdown += `\n## Proyek:\n`;
+  data.projects.forEach((project, index) => {
+    markdown += `${index + 1}. **${project.title}**\n`;
+    markdown += `   - ${project.description}\n`;
+    markdown += `   - [Lihat proyek](${project.link})\n`;
+  });
+
+  return markdown;
+}
+
 // Fungsi untuk memproses pertanyaan ke AI
-export // Fungsi untuk memproses pertanyaan ke AI
-const chatWithAI = async (message) => {
+export const chatWithAI = async (message) => {
   if (!AI_URL || !API_KEY) {
     return "Konfigurasi API tidak ditemukan. Harap periksa variabel lingkungan.";
   }
