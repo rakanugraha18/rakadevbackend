@@ -74,6 +74,33 @@ function formatMarkdownData(data) {
     markdown += `   - [Lihat proyek](${project.link})\n`;
   });
 
+  // **HOBBIES**
+  markdown += `\n## Hobi:\n`;
+  data.hobbies.forEach((hobby, index) => {
+    markdown += `${index + 1}. ${hobby}\n`;
+  });
+
+  // **INTERESTS**
+  markdown += `\n## Minat:\n`;
+  data.interests.forEach((interest, index) => {
+    markdown += `${index + 1}. ${interest}\n`;
+  });
+
+  // **LANGUAGES**
+  markdown += `\n## Bahasa:\n`;
+  data.languages.forEach((language, index) => {
+    if (typeof language.level === "string") {
+      markdown += `${index + 1}. **${language.language}** - ${
+        language.level
+      }\n`;
+    } else {
+      markdown += `${index + 1}. **${language.language}**:\n`;
+      Object.entries(language.level).forEach(([skill, level]) => {
+        markdown += `   - ${skill}: ${level}\n`;
+      });
+    }
+  });
+
   return markdown;
 }
 
