@@ -7,18 +7,13 @@ import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import groqRoutes from "./routes/groqRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
-
-dotenv.config();
 const app = express();
-
 const allowedOrigins = [
   "https://rakanugrahadev.vercel.app",
   "http://localhost:3000",
 ];
 
 // Middleware
-app.use(express.json());
-
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -33,7 +28,9 @@ app.use(
   })
 );
 
+app.use(express.json());
 app.use(cookieParser());
+app.options("*", cors()); // untuk handle preflight secara global
 
 // Koneksi ke database
 connectDB();
