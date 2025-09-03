@@ -85,7 +85,7 @@ export const chatWithAI = async (message) => {
     const response = await axios.post(
       AI_URL,
       {
-        model: "llama3-8b-8192", // ← ini yang diganti
+        model: "llama-3.3-70b-versatile", // ← ini yang diganti
         messages: [
           {
             role: "system",
