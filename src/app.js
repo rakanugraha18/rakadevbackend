@@ -10,24 +10,23 @@ import emailRoutes from "./routes/emailRoutes.js";
 const app = express();
 
 const frontendURL =
-  process.env.FRONTEND_URL || process.env.FRONTEND_URL_ALTERNATE;
+  process.env.FRONTEND_URL ||
+  process.env.FRONTEND_URL_ALTERNATE ||
+  process.env.FRONTEND_URL_ALTERNATE_DUA;
 
 const allowedOrigins = [frontendURL];
 
-// Middleware
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, origin); // Izinkan request jika origin sesuai daftar
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: "GET,POST,PUT,DELETE",
-    allowedHeaders: "Content-Type,Authorization",
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+dotenv.config();
+
+// Middleware
 
 app.use(express.json());
 app.use(cookieParser());
