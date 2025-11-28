@@ -8,10 +8,11 @@ import userRoutes from "./routes/userRoutes.js";
 import groqRoutes from "./routes/groqRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
 const app = express();
-const allowedOrigins = [
-  "https://rakanugrahadev.vercel.app",
-  "http://localhost:3000",
-];
+
+const frontendURL =
+  process.env.FRONTEND_URL || process.env.FRONTEND_URL_ALTERNATE;
+
+const allowedOrigins = [frontendURL];
 
 // Middleware
 app.use(
