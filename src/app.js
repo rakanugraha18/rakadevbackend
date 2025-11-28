@@ -12,6 +12,7 @@ const allowedOrigins = [
   "https://rakanugrahadev.xyz",
   "http://localhost:3000",
   "https://www.rakanugrahadev.xyz",
+  "https://rakanugrahadev.vercel.app",
 ];
 
 // Middleware
